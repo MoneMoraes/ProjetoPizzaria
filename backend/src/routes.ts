@@ -2,6 +2,8 @@ import {Router } from 'express'
 import multer from 'multer'
 
 import { CreateUserController } from './controllers/user/CreateUserController'
+import { validateSchema } from './middlewares/validateSchema'
+import { createUserSchema } from './schemas/userSchema'
 import { AuthUserController } from './controllers/user/AuthUserController'
 import { DetailUserController } from './controllers/user/DetailUserController'
 
@@ -33,7 +35,7 @@ const router = Router();
 const upload = multer(uploadConfig.upload("./tmp"));
 
 //-- ROTAS USER --
-router.post('/users', new CreateUserController().handle)
+router.post('/users', validateSchema(createUserSchema), new CreateUserController().handle)
 
 router.post('/session', new AuthUserController().handle)
 
