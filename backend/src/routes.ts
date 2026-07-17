@@ -24,6 +24,7 @@ import { FinishOrderController } from './controllers/order/FinishOrderController
 
 
 import { isAuthenticated } from './middlewares/isAuthenticated'
+import { isAdmin } from './middlewares/isAdmin'
 
 import uploadConfig from './config/multer'
 
@@ -39,7 +40,7 @@ router.post('/session', new AuthUserController().handle)
 router.get('/me', isAuthenticated, new DetailUserController().handle )
 
 //-- ROTAS CATEGORY
-router.post('/category', isAuthenticated, new CreateCategoryController().handle )
+router.post('/category', isAuthenticated, isAdmin, new CreateCategoryController().handle )
 
 router.get('/category', isAuthenticated, new ListCategoryController().handle)
 

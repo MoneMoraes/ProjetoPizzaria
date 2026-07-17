@@ -11,7 +11,7 @@ class CreateCategoryController{
             name
         });
 
-        return res.json(category);
+        return res.status(201).json(category);
 
     }
 }
