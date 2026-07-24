@@ -1,20 +1,19 @@
-import crypto from 'crypto'
 import multer from 'multer'
 
-import {extname, resolve} from 'path'
 
 export default{
-    upload(folder: string){
-        return{
-            storage: multer.diskStorage({
-                destination: resolve(__dirname, '..', '..', folder),
-                filename: (request, file, callback) => {
-                    const fileHash = crypto.randomBytes(16).toString("hex");
-                    const fileName = `${fileHash}-${file.originalname}`
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 5 * 1024 * 1024, // 5mb 
+    },
+    fileFilter: (req: any, file: Express.Multer.File, cb: any) => {
+        const allowedMimes = ["image/jpeg", "image/jpg", "image/png"];
 
-                    return callback(null, fileName)
-                }
-            })
+        if (allowedMimes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error("Formato de arquivo inválido. Apenas são aceitos arquivos do tipo: jpg, jpeg e png"));
         }
-    }
-}
+    },
+};
+    

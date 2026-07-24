@@ -5,6 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url = env("DATABASE_URL")
 }
 
 enum Role{
@@ -37,7 +38,7 @@ model Category {
 model Product {
   id          String    @id @default(uuid())
   name        String
-  price       String
+  price       Int
   description String
   banner      String
   disabled Boolean @default(false)
@@ -65,7 +66,7 @@ model Order {
 
 model Item {
   id         String    @id @default(uuid())
-  amount     Int
+  amount     Int // Centavos
   created_at DateTime? @default(now())
   updated_at DateTime? @default(now())
   order_id   String
