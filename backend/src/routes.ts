@@ -13,6 +13,7 @@ import { ListCategoryController } from './controllers/category/ListCategoryContr
 
 import { CreateProductController } from './controllers/product/CreateProductController'
 import { ListByCategoryController } from './controllers/product/ListByCategoryController'
+import { ListProductsController } from './controllers/product/ListProductsController'
 
 import { CreateOrderController } from './controllers/order/CreateOrderController'
 import { RemoveOrderController } from './controllers/order/RemoveOrderController'
@@ -30,45 +31,52 @@ import { isAuthenticated } from './middlewares/isAuthenticated'
 import { isAdmin } from './middlewares/isAdmin'
 
 import uploadConfig from './config/multer'
+import { CreateProductSchema, listProductsByCategorySchema, listProductsSchema } from './schemas/productSchema'
+import { DeleteProductController } from './controllers/product/DeleteProductController'
+import { orderSchema } from './schemas/orderSchema'
 
 const router = Router();
 
 const upload = multer(uploadConfig);
 
 //-- ROTAS USER --
-router.post('/users', validateSchema(createUserSchema), new CreateUserController().handle)
+router.post('/users', validateSchema(createUserSchema), new CreateUserController().handle);
 
-router.post('/session', new AuthUserController().handle)
+router.post('/session', new AuthUserController().handle);
 
-router.get('/me', isAuthenticated, new DetailUserController().handle )
+router.get('/me', isAuthenticated, new DetailUserController().handle );
 
 //-- ROTAS CATEGORY
-router.post('/category', isAuthenticated, isAdmin, validateSchema(createCategorySchema), new CreateCategoryController().handle )
+router.post('/category', isAuthenticated, isAdmin, validateSchema(createCategorySchema), new CreateCategoryController().handle );
 
-router.get('/category', isAuthenticated, new ListCategoryController().handle)
+router.get('/category', isAuthenticated, new ListCategoryController().handle);
 
 //-- ROTAS PRODUCT
-router.post('/product', isAuthenticated, isAdmin, upload.single('file'), new CreateProductController().handle)
+router.post('/product', isAuthenticated, isAdmin, upload.single('file'), validateSchema(CreateProductSchema), new CreateProductController().handle);
 
-router.get('/category/product', isAuthenticated, new ListByCategoryController().handle )
+router.get('/product', isAuthenticated, validateSchema(listProductsSchema), new ListProductsController().handle);
+
+router.delete('/product', isAuthenticated, isAdmin, new DeleteProductController().handle);
+
+router.get('/category/product', isAuthenticated, validateSchema(listProductsByCategorySchema), new ListByCategoryController().handle );
 
 //-- ROTAS ORDER
 
-router.post('/order', isAuthenticated, new CreateOrderController().handle)
+router.post('/order', isAuthenticated, validateSchema(orderSchema), new CreateOrderController().handle);
 
-router.delete('/order', isAuthenticated, new RemoveOrderController().handle)
+router.delete('/order', isAuthenticated, new RemoveOrderController().handle);
 
-router.post('/order/add', isAuthenticated, new AddItemController().handle)
+router.post('/order/add', isAuthenticated, new AddItemController().handle);
 
-router.delete('/order/remove', isAuthenticated, new RemoveItemController().handle )
+router.delete('/order/remove', isAuthenticated, new RemoveItemController().handle );
 
-router.put('/order/send', isAuthenticated, new SendOrderController().handle)
+router.put('/order/send', isAuthenticated, new SendOrderController().handle);
 
-router.get('/orders', isAuthenticated, new ListOrdersController().handle)
+router.get('/orders', isAuthenticated, new ListOrdersController().handle);
 
-router.get('/order/detail', isAuthenticated, new DetailOrderController().handle)
+router.get('/order/detail', isAuthenticated, new DetailOrderController().handle);
 
-router.put('/order/finish', isAuthenticated, new FinishOrderController().handle)
+router.put('/order/finish', isAuthenticated, new FinishOrderController().handle);
 
 export { router };
 

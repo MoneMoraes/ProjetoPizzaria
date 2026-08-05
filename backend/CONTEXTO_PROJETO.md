@@ -93,16 +93,30 @@ backend/
 │   │   └── express/
 │   │       └── index.d.ts    # Extensão de tipos do Express
 │   ├── config/               # Configurações da aplicação
+│   │   ├── claudinary.ts
+│   │   └── multer.ts
 │   ├── controllers/          # Controllers (recebem requisições)
 │   │   ├── category/
-│   │   │   └── CreateCategoryController.ts
+│   │   │   ├── CreateCategoryController.ts
+│   │   │   └── ListCategoryController.ts
+│   │   ├── order/
+│   │   │   ├── AddItemController.ts
+│   │   │   ├── CreateOrderController.ts
+│   │   │   ├── DetailOrderController.ts
+│   │   │   ├── FinishOrderController.ts
+│   │   │   ├── ListOrdersController.ts
+│   │   │   ├── RemoveItemController.ts
+│   │   │   ├── RemoveOrderController.ts
+│   │   │   └── SendOrderController.ts
+│   │   ├── product/
+│   │   │   ├── CreateProductController.ts
+│   │   │   └── ListByCategoryController.ts
 │   │   └── user/
 │   │       ├── AuthUserController.ts
 │   │       ├── CreateUserController.ts
 │   │       └── DetailUserController.ts
 │   ├── generated/            # Código gerado pelo Prisma
 │   │   └── prisma/
-│   │       └── client.ts
 │   ├── middlewares/          # Middlewares customizados
 │   │   ├── isAdmin.ts        # Verifica se usuário é admin
 │   │   ├── isAuthenticated.ts # Valida JWT token
@@ -111,10 +125,24 @@ backend/
 │   │   └── index.ts
 │   ├── schemas/              # Schemas de validação Zod
 │   │   ├── categorySchema.ts
+│   │   ├── productSchema.ts
 │   │   └── userSchema.ts
 │   ├── services/             # Services (lógica de negócio)
 │   │   ├── category/
-│   │   │   └── CreateCategoryService.ts
+│   │   │   ├── CreateCategoryService.ts
+│   │   │   └── ListCategoryService.ts
+│   │   ├── order/
+│   │   │   ├── AddItemService.ts
+│   │   │   ├── CreateOrderService.ts
+│   │   │   ├── DetailOrderService.ts
+│   │   │   ├── FinishOrderService.ts
+│   │   │   ├── ListOrderService.ts
+│   │   │   ├── RemoveItemService.ts
+│   │   │   ├── RemoveOrderService.ts
+│   │   │   └── SendOrderService.ts
+│   │   ├── product/
+│   │   │   ├── CreateProductService.ts
+│   │   │   └── ListByCategoryService.ts
 │   │   └── user/
 │   │       ├── AuthUserService.ts
 │   │       ├── CreateUserService.ts
@@ -397,6 +425,30 @@ Valida criação de categorias:
 
 - Nome inválido: "Nome da categoria precisa ter 2 caracteres"
 
+### Product Schemas (`schemas/productSchema.ts`)
+
+#### **CreateProductSchema**
+
+Valida a criação de produtos e utiliza o schema real definido em `src/schemas/productSchema.ts`:
+
+```typescript
+{
+  body: {
+    name: string (obrigatório),
+    price: string numérica (obrigatório),
+    description: string (obrigatório),
+    category_id: string (obrigatório)
+  }
+}
+```
+
+**Regras de validação**:
+
+- Nome obrigatório
+- Preço obrigatório e deve ser um valor inteiro em formato de texto
+- Descrição obrigatória
+- `category_id` obrigatório
+
 ---
 
 ## 🌐 Endpoints
@@ -503,6 +555,8 @@ Authorization: Bearer <token>
 
 Cria uma nova categoria de produtos.
 
+**Controller**: `src/controllers/category/CreateCategoryController.ts`
+**Service**: `src/services/category/CreateCategoryService.ts`
 **Middlewares**: `isAuthenticated`, `isAdmin`, `validateSchema(createCategorySchema)`
 
 **Permissão**: Apenas usuários com role ADMIN
@@ -529,6 +583,97 @@ Authorization: Bearer <token>
   "name": "Pizzas Doces",
   "createdAt": "2025-11-11T10:30:00.000Z"
 }
+```
+
+#### **GET /category**
+
+Lista todas as categorias cadastradas.
+
+**Controller**: `src/controllers/category/ListCategoryController.ts`
+**Service**: `src/services/category/ListCategoryService.ts`
+**Middlewares**: `isAuthenticated`
+
+**Resposta de Sucesso (200)**:
+
+```json
+[
+  {
+    "id": "uuid-da-categoria",
+    "name": "Pizzas Doces",
+    "createdAt": "2025-11-11T10:30:00.000Z"
+  }
+]
+```
+
+---
+
+### **Produtos**
+
+#### **POST /product**
+
+Cria um novo produto, incluindo upload de imagem.
+
+**Controller**: `src/controllers/product/CreateProductController.ts`
+**Service**: `src/services/product/CreateProductService.ts`
+**Middlewares**: `isAuthenticated`, `isAdmin`, `upload.single('file')`, `validateSchema(CreateProductSchema)`
+
+**Permissão**: Apenas usuários com role ADMIN
+
+**Headers**:
+
+```
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+```
+
+**Body (form-data)**:
+
+```text
+name: "Pizza Calabresa"
+price: "3500"
+description: "Pizza de calabresa com cebola"
+category_id: "uuid-da-categoria"
+file: <imagem>
+```
+
+**Resposta de Sucesso (200)**:
+
+```json
+{
+  "id": "uuid-do-produto",
+  "name": "Pizza Calabresa",
+  "price": 3500,
+  "description": "Pizza de calabresa com cebola",
+  "banner": "url-da-imagem",
+  "category_id": "uuid-da-categoria"
+}
+```
+
+#### **GET /category/product**
+
+Lista produtos de uma categoria específica.
+
+**Controller**: `src/controllers/product/ListByCategoryController.ts`
+**Service**: `src/services/product/ListByCategoryService.ts`
+**Middlewares**: `isAuthenticated`
+
+**Query Params**:
+
+```text
+category_id: uuid-da-categoria
+```
+
+**Resposta de Sucesso (200)**:
+
+```json
+[
+  {
+    "id": "uuid-do-produto",
+    "name": "Pizza Calabresa",
+    "price": 3500,
+    "description": "Pizza de calabresa com cebola"
+  }
+]
 ```
 
 ---
